@@ -1,5 +1,5 @@
-import React from 'react'
-import { scaleLinear, scaleTime, extent, timeFormat, bin, timeMonths, sum, max } from 'd3'
+import React, { useRef, useEffect } from 'react'
+import { scaleLinear, scaleTime, extent, timeFormat, bin, timeMonths, sum, max, brushX, select } from 'd3'
 import AxisLeft from './AxisLeft'
 import AxisBottom from './AxisBottom'
 import Marks from './Marks'
@@ -20,6 +20,7 @@ const xAxisTickFormat = timeFormat('%m/%d/%Y')
 
 export const DateHistogram = ({ data, height, width }) => {
   // const data = useData()
+  const brushRef = useRef()
 
   const xValue = (d) => d['Reported Date']
   const xAxisLabel = 'Time'
@@ -60,6 +61,15 @@ export const DateHistogram = ({ data, height, width }) => {
 
   // console.log(yScale.domain()) // [0, 1600]
 
+  useEffect(() => {
+    const brush = brushX() //
+      .extent([
+        [0, 0],
+        [innerWidth, innerHeight]
+      ]) // arr1 - where brush starts, arr2 - where brush ends
+    brush(select(brushRef.current))
+  }, [innerWidth, innerHeight]) // each time any of these dependencies change, this effect runs again
+
   return (
     <>
       <rect width={width} height={height} fill="white" />
@@ -94,6 +104,7 @@ export const DateHistogram = ({ data, height, width }) => {
           tooltipFormat={(d) => d}
           innerHeight={innerHeight}
         />
+        <g ref={brushRef} />
       </g>
     </>
   )

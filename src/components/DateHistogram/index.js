@@ -18,18 +18,8 @@ const yAxisLabelOffset = 30
 
 const xAxisTickFormat = timeFormat('%m/%d/%Y')
 
-export const DateHistogram = ({ data, height, width }) => {
+export const DateHistogram = ({ data, height, width, setBrushExtent, xValue }) => {
   // const data = useData()
-  const brushRef = useRef()
-
-  const xValue = (d) => d['Reported Date']
-  const xAxisLabel = 'Time'
-
-  const yValue = (d) => d['Total Dead and Missing']
-  const yAxisLabel = 'Total Dead and Missing'
-
-  // console.log(data[0])
-
   const innerHeight = height - margin.top - margin.bottom
   const innerWidth = width - margin.right - margin.left
 
@@ -38,7 +28,11 @@ export const DateHistogram = ({ data, height, width }) => {
     .range([0, innerWidth])
     .nice()
 
+  const xAxisLabel = 'Time'
   const [start, stop] = xScale.domain()
+
+  const yValue = (d) => d['Total Dead and Missing']
+  const yAxisLabel = 'Total Dead and Missing'
 
   // compute the binnedData
   const binnedData = bin() // construct our bins
@@ -51,6 +45,7 @@ export const DateHistogram = ({ data, height, width }) => {
       x0: array.x0, // start date for each bin
       x1: array.x1 // end date for each bin
     }))
+  // console.log(data[0])
 
   // console.log(binnedData)
 
@@ -60,7 +55,9 @@ export const DateHistogram = ({ data, height, width }) => {
     .nice()
 
   // console.log(yScale.domain()) // [0, 1600]
+  const brushRef = useRef()
 
+  // useEffect invoked only after rendering is complete
   useEffect(() => {
     const brush = brushX() //
       .extent([
@@ -68,6 +65,10 @@ export const DateHistogram = ({ data, height, width }) => {
         [innerWidth, innerHeight]
       ]) // arr1 - where brush starts, arr2 - where brush ends
     brush(select(brushRef.current))
+    brush.on('brush end', (event) => {
+      // console.log(event.selection.map(xScale.invert)) // invert accepts a value from the range of the scale and returns a value from the scale's domain, in this case it takes a pixel coord and returns a date
+      setBrushExtent(event.selection && event.selection.map(xScale.invert))
+    })
   }, [innerWidth, innerHeight]) // each time any of these dependencies change, this effect runs again
 
   return (

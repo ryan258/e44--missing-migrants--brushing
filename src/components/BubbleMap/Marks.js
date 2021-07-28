@@ -1,4 +1,6 @@
-import React from 'react'
+//! HOT TIP: YOU CAN MEMOIZE IN JSX !//
+
+import React, { useMemo } from 'react'
 import { geoNaturalEarth1, geoPath, geoGraticule } from 'd3'
 
 const projection = geoNaturalEarth1()
@@ -7,32 +9,38 @@ const graticule = geoGraticule()
 
 const Marks = ({ worldAtlas: { land, interiors }, data, sizeScale, sizeValue }) => (
   <g className="marks">
-    <path //! sphere
-      // key={feature.id}
-      d={path({ type: 'Sphere' })}
-      className="sphere"
-    />
+    {useMemo(
+      () => (
+        <>
+          <path //! sphere
+            // key={feature.id}
+            d={path({ type: 'Sphere' })}
+            className="sphere"
+          />
 
-    <path //! graticules
-      // key={feature.id}
-      d={path(graticule())}
-      className="graticules"
-    />
+          <path //! graticules
+            // key={feature.id}
+            d={path(graticule())}
+            className="graticules"
+          />
 
-    {land.features.map((feature) => (
-      <path // countries
-        // key={feature.id}
-        d={path(feature)}
-        className="land"
-      />
-    ))}
+          {land.features.map((feature) => (
+            <path // countries
+              // key={feature.id}
+              d={path(feature)}
+              className="land"
+            />
+          ))}
 
-    <path // land borders
-      // key={feature.id}
-      d={path(interiors)}
-      className="interiors"
-    />
-
+          <path // land borders
+            // key={feature.id}
+            d={path(interiors)}
+            className="interiors"
+          />
+        </>
+      ),
+      [land, interiors]
+    )}
     {data.map((d) => {
       // d is a single city
       const [x, y] = projection(d.coords)
